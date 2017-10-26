@@ -15,7 +15,6 @@ export const Numbers = (props) => {
         {Numbers.list.map((number, i) => 
           <span className={getNumberClassName(number)}  
             onClick={() => props.selectNumber(number)}
-            disabled={true}
             key={i}>
             {number}
           </span>
