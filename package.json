@@ -1,0 +1,21 @@
+{
+  "name": "4w7zp40jzw",
+  "description": null,
+  "version": "0.0.109",
+  "dependencies": {
+    "underscore": "1.8.3",
+    "react-dom": "16.0.0",
+    "react": "16.0.0",
+    "font-awesome": "4.7.0",
+    "bootstrap": "3.3.7"
+  },
+  "devDependencies": {
+    "react-scripts": "1.0.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
