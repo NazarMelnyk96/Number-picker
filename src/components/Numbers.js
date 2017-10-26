@@ -4,10 +4,11 @@ import { contains } from 'underscore';
 
 export const Numbers = (props) => {
   const getNumberClassName = (number) => {
-    return contains(props.selectedNumbers, number) 
+    return contains(props.selectedNumbers, number) || props.isLose
       ? 'selected'
       : '';
-  }
+  };
+
   return (
     <div className="card text-center">
       <div>

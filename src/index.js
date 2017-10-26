@@ -11,23 +11,32 @@ import { Numbers } from "./components/Numbers";
 import { RedrawBtn } from './components/RedrawBtn';
 import { GameFinal } from './components/GameFinal';
 import { RetryBtn } from './components/RetryBtn';
+import { Timer } from './components/Timer';
 
 Numbers.list = _.range(1, 10);
+Timer.start = Date.now();
 
 class App extends React.Component {    
+  REDRAWS_COUNT = 7;
+  NUMBERS_COUNT = 9;
+  LIMIT_SEC = 60;
+  WIN_MESS = 'You win';
+  LOSE_MESS = 'You lose';
 
   initialState = {
     selectedNumbers: [],    
-    starsCount: getRandomNumberInRange(9),
+    starsCount: getRandomNumberInRange(this.NUMBERS_COUNT),
     isAnswerCorrect: null,
     isLose: null,
-    redrawsCount: 7
+    redrawsCount: this.REDRAWS_COUNT,
+    limitElapsed: false,
+    isFinal: false,
   };
 
   state = this.initialState;
 
   selectNumber = clickedNumber => {
-    if (_.contains(this.state.selectedNumbers, clickedNumber)) {
+    if (_.contains(this.state.selectedNumbers, clickedNumber) || this.state.isLose) {
       return;
     }
     this.setState(prevState => ({
@@ -78,10 +87,11 @@ class App extends React.Component {
         isLose === null) {
       isLose = true;
       isFinal = true;
-    }    
-    this.setState(prevState => ({      
-      isLose: isLose
-    }));
+    }
+    this.setIsLoseState(isLose);
+    this.setState({
+        isFinal: isFinal
+    });
     return isFinal;
   };
 
@@ -90,14 +100,15 @@ class App extends React.Component {
   };
 
   getNextStarsCount = () => {
-    let nextNumber = getRandomNumberInRange(9);
+    let nextNumber = getRandomNumberInRange(this.NUMBERS_COUNT);
       while (nextNumber === this.state.starsCount) {
-        nextNumber = getRandomNumberInRange(9);
+        nextNumber = getRandomNumberInRange(this.NUMBERS_COUNT);
     }
     return nextNumber;
   };
 
   redraw = () => {
+    if (this.state.isLose) return;
     this.state.redrawsCount--;
     this.setState({
       selectedNumbers: [],
@@ -108,7 +119,21 @@ class App extends React.Component {
 
   retry = () => {    
     Numbers.list = _.range(1, 10);
+    Timer.start = Date.now();
+    Timer.timer = setInterval(Timer.tick, 100);
     this.setState(this.initialState);
+  };
+
+  setIsLoseState = (isLose, callback) => {
+    this.setState({
+        isLose: isLose
+    }, () => callback && callback());
+  };
+
+  setIsLimitElapsed = (isLimitElapsed) => {
+    this.setState({
+        limitElapsed: isLimitElapsed
+    });
   };
 
   render() {
@@ -117,18 +142,27 @@ class App extends React.Component {
       selectedNumbers,
       isAnswerCorrect,
       isLose,
-      redrawsCount
+      redrawsCount,
     } = this.state;
     
     let finalMessage = isLose === true 
-      ? 'You lose'
+      ? this.LOSE_MESS
       : isLose === false 
-        ? 'You win'
+        ? this.WIN_MESS
         : null;
     
     return (
       <div className="container">
-        <Header />
+        <nav className="navbar navbar-default">
+          <Header />
+          <Timer
+              isFinal={this.state.isFinal}
+              setIsLimitElapsed={this.state.setIsLimitElapsed}
+              limitElapsed={this.state.limitElapsed}
+              limitSec={this.LIMIT_SEC}
+              setIsLoseState={this.setIsLoseState}
+          />
+        </nav>
         <hr />
         <div className="row">
           <Stars starsCount={starsCount} />
@@ -137,25 +171,35 @@ class App extends React.Component {
               isAnswerCorrect={isAnswerCorrect}
               acceptNumbers={this.acceptNumbers}
               starsCount={starsCount} 
-              selectedNumbers={selectedNumbers}/>
-              <br /> 
-            <RedrawBtn 
-              redrawsCount={redrawsCount}
-              redraw={this.redraw} />
+              selectedNumbers={selectedNumbers}
+            />
             <br />
-            {finalMessage ? <RetryBtn retry={this.retry}/> : ''}
+            <RedrawBtn
+              isLose={isLose}
+              redrawsCount={redrawsCount}
+              redraw={this.redraw}
+            />
+            <br />
+            {
+              finalMessage
+                ? <RetryBtn retry={this.retry}/>
+                : ''
+            }
           </div>
           <Answer 
             deselectNumber={this.deselectNumber} 
-            selectedNumbers={selectedNumbers} />
+            selectedNumbers={selectedNumbers}
+          />
         </div>
         <br />
         <div className="flex-container">
           <GameFinal finalMessage={finalMessage}/>
         </div>
         <Numbers
+          isLose={isLose}
           selectNumber={this.selectNumber}
-          selectedNumbers={selectedNumbers} />
+          selectedNumbers={selectedNumbers}
+        />
       </div>
     );
   }
