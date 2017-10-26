@@ -4,16 +4,18 @@ import { contains } from 'underscore';
 
 export const Numbers = (props) => {
   const getNumberClassName = (number) => {
-    return contains(props.selectedNumbers, number) 
+    return contains(props.selectedNumbers, number) || props.isLose
       ? 'selected'
       : '';
-  }
+  };
+
   return (
     <div className="card text-center">
       <div>
         {Numbers.list.map((number, i) => 
           <span className={getNumberClassName(number)}  
             onClick={() => props.selectNumber(number)}
+            disabled={true}
             key={i}>
             {number}
           </span>
